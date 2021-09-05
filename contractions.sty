@@ -1,0 +1,123 @@
+%% BEGIN contractions.sty
+%%
+%% LaTeX document style for generating Wick contractions.
+%%
+%% As these macros are TeX, they will work with LaTeX too.
+%%
+%% These macros were written by Dan Schroeder (of Peskin and Schroeder
+%% fame) and emailed to me.  I've put all this crap at the start,
+%% called it a .sty file and modified it so it will do 4 contractions
+%% rather than just three.
+%%
+%% To use, you need to put \usepackage{contractions} in your LaTeX
+%% file.
+%%
+%% Some examples of use are shown at the bottom of this file.
+%%
+%% Stewart V. Wright,  May 2001.
+%% http://github.com/resuscv/Wick-Contractions
+%%
+\newif\ifContLineOne
+\newif\ifContLineTwo
+\newif\ifContLineThree
+\newif\ifContLineFour
+% conC draws horizontal lines.  lines have width .4pt and are separated
+% by 3.2pt of space.  Bottom of lowest line is 14pt above baseline.
+\def\conC#1{\vbox{\ialign{##\crcr
+  \ifContLineFour\hrulefill\else\vphantom{\hrulefill}\fi\crcr
+  \noalign{\kern3.2pt\nointerlineskip}
+  \ifContLineThree\hrulefill\else\vphantom{\hrulefill}\fi\crcr
+  \noalign{\kern3.2pt\nointerlineskip}
+  \ifContLineTwo\hrulefill\else\vphantom{\hrulefill}\fi\crcr
+  \noalign{\kern3.2pt\nointerlineskip}
+  \ifContLineOne\hrulefill\else\vphantom{\hrulefill}\fi\crcr
+  \noalign{\nointerlineskip}
+  $\hfil\textstyle{\vbox to 14pt{}#1}\hfil$\crcr}}}
+% The following macro draws vertical legs.  dimen2 is height of
+% bottom of leg.  The initial value of dimen3+(#2*dimen4) is height
+% of top of leg, and must be adjusted if these macros are used under
+% different vertical spacing conditions.
+\def\DrawLeg#1#2{
+  \kern-.2pt              % back up half width of leg
+  \dimen2 =#1             % =height of whatever is underneath leg
+  \advance\dimen2 by 2pt  % 2pt space below bottom of leg
+  \dimen3 = 10.6pt        % base value of height of top of leg
+  \dimen4 =3.6pt          % add this much time 1 2 or 3 to base value
+  \advance\dimen3 by -\dimen2 
+  \multiply\dimen4 by #2
+  \advance\dimen3 by \dimen4
+  \raise\dimen2 \hbox{\vrule height\dimen3 width .4pt} % draw it
+  \kern-.2pt}             % and back up half width of line
+\def\begC#1#2{\setbox0 =\hbox{$\textstyle{#2}$}
+  \dimen0=.5\wd0 \dimen1=\ht0
+  \conC{\hskip\dimen0}
+  \count255=#1
+  \ifnum\count255 =1 \ContLineOnetrue\else
+  \ifnum\count255 =2 \ContLineTwotrue\else
+  \ifnum\count255 =3 \ContLineThreetrue\else
+  \ifnum\count255 =4 \ContLineFourtrue\fi\fi\fi\fi
+  \DrawLeg{\dimen1}{\count255}
+  \conC{\hskip\dimen0}
+  \kern-\dimen0\kern-\dimen0 \box0}
+\def\endC#1#2{\setbox0 =\hbox{$\textstyle{#2}$}
+  \dimen0=.5\wd0 \dimen1=\ht0
+  \conC{\hskip\dimen0}
+  \count255=#1
+  \ifnum\count255 =1 \ContLineOnefalse\else
+  \ifnum\count255 =2 \ContLineTwofalse\else
+  \ifnum\count255 =3 \ContLineThreefalse\else
+  \ifnum\count255 =4 \ContLineFourfalse\fi\fi\fi\fi
+  \DrawLeg{\dimen1}{\count255}
+  \conC{\hskip\dimen0}
+  \kern-\dimen0\kern-\dimen0 \box0}
+%
+%% examples of using the contraction macros:
+%$$
+%\begC1\phi\conC{(x)}\endC1\phi(y)
+%$$
+%$$
+%\begC1{\phi_1}\endC1{\phi_2}\begC1{\phi_3}\endC1{\phi_4}
+%   +\begC1{\phi_1}\begC2{\phi_2}\endC1{\phi_3}\endC2{\phi_4}
+%   +\begC2{\phi_1}\begC1{\phi_2}\endC1{\phi_3}\endC2{\phi_4}
+%$$
+%$$
+%\begC2{\phi(x)}\begC3{\phi(y)}\conC{\,{1\over3!}
+%  \bigl({-i\lambda\over4!}\bigr)^3\int\!d^4z\,}\endC2{\phi}\begC1{\phi}
+%  \endC1\phi\begC1\phi\conC{\,\int\!d^4w\,}\endC1\phi\begC2\phi
+%  \begC1\phi\endC3\phi\conC{\,\int\!d^4u\,}\endC1\phi\endC2\phi
+%  \begC1\phi\endC1\phi
+%$$
+%$$
+%\begC4\phi\begC3\phi\begC2\phi\begC1\phi
+%  \endC4\phi\endC1\phi\endC2\phi\endC3\phi
+%$$
+%
+%\begin{eqnarray}
+%a & = & b \\
+%& = & \begC2{\phi_1}\begC1{\phi_2}\endC1{\phi_3}\endC2{\phi_4} \\
+%& = & \begC4\phi\begC3\phi\begC2\phi\begC1\phi
+%  \endC4\phi\endC1\phi\endC2\phi\endC3\phi \\
+%& = & d
+%\end{eqnarray}
+%% \begC begins a new contraction; its first argument is a number from
+%% 1 to 3, indicating the vertical level; its second argument is the
+%% character or group of characters over which the vertical line is to
+%% be centered.
+%
+%% \conC continues any ongoing contractions, putting the necessary
+%% horizontal lines over the text of its argument.
+%
+%% \endC ends a contraction, taking a number from 1 to 3 as its first
+%% argument and the symbol(s) as its second argument, just like \begC.
+%
+%% These macros have the side effect of leaving enough vertical
+%% space for all three levels, even if you use only one level.  Use
+%% \smash and \vphantom if necessary to take up the extra vertical
+%% white space.
+%
+%% The contraction macros are set up for 10pt Computer Modern type.
+%% for other fonts or sizes the numerical parameters should be tweaked
+%% by trial and error.
+%
+%%
+%% End of file `contractions.sty'.
